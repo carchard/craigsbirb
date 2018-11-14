@@ -9,11 +9,14 @@ from constants import CL_DATE_FORMAT
 
 
 class Post_Getter:
-    def __init__(self, city='boston', start_time=None):
+    def __init__(self, city='boston',
+                 start_time=None,
+                 save_fname=GETTER_OUTPUT_FILE):
         if start_time is None:
             self.last_update_time = datetime.datetime.now()
         else:
             self.last_update_time = start_time
+        self.save_fname = save_fname
         self.base_url = "https://{}".format(city)
         self.base_url += ".craigslist.org/d/photo-video/search/pha"
         self.latest_content = ""
@@ -32,24 +35,24 @@ class Post_Getter:
 
         self.new_links = []
         for block in self.latest_content:
-            print('\n\n' + "".join(['=']*40))
             d1 = block.find_all('a', 'result-title hdrlnk')[0]
             title = d1.string.strip()
             link = d1.attrs['href']
 
-            print("Title: {}".format(title))
-            print("Link: {}".format(link))
             d2 = block.p.find_all('span', 'result-meta')[0]
             try:
                 price = d2.find_all('span',
                                     'result-price')[0].string.strip()
-            except IndexError as e:
+            except IndexError:
                 price = "None Provided"
-            print("Price: {}".format(price))
             dt = block.p.time.attrs['datetime']
-            print("Post Time: {}".format(dt))
-
-            print()
+            if DEBUG_LEVEL >= 2:
+                print('\n\n' + "".join(['=']*40))
+                print("Title: {}".format(title))
+                print("Link: {}".format(link))
+                print("Price: {}".format(price))
+                print("Post Time: {}".format(dt))
+                print()
             dt_formatted = datetime.datetime.strptime(dt,
                                              CL_DATE_FORMAT)
             if dt_formatted > self.last_update_time:
@@ -63,7 +66,7 @@ class Post_Getter:
         self.write_output_file()
 
     def write_output_file(self):
-        with open(GETTER_OUTPUT_FILE, 'w') as f:
+        with open(self.save_fname, 'w') as f:
             json.dump(self.new_links, f, indent=4, sort_keys=True,
                       separators=(',', ':'))
 

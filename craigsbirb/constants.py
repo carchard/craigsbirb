@@ -26,4 +26,9 @@ KEYWORDS = ["nikon",
             "85mm",
             "ef-m",
             "eos-m",
-            "carbon"]
+            "carbon"
+            ]
+
+BADWORDS = ["tamron",
+            "f3.5",
+            ]

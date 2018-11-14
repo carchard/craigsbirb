@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 from constants import KEYWORDS
+from constants import BADWORDS
 from constants import GETTER_OUTPUT_FILE
 from constants import EXTRACTOR_OUTPUT_FILE
 
@@ -33,7 +34,10 @@ class Feature_Extractor():
         :return: pandas dataframe
         """
         features_dict = {}
-
+        lowercases = 'abcdefghijklmnopqrstuvwxyz'
+        title_letters = [l for l in list(getter_dict['title']) if
+                                         l.lower() in lowercases]
+        title_uppers = [l for l in title_letters if l.isupper()]
         # preprocessing
         html_data = requests.get(getter_dict['link'])
         if html_data.status_code == 200:
@@ -43,9 +47,10 @@ class Feature_Extractor():
         html_data = bs(html_data, 'html.parser')
         user_text = html_data.find('section',
                                    {'id': 'postingbody'}).getText()
+        text_letters = [l for l in list(user_text) if
+                                         l.lower() in lowercases]
+        text_uppers = [l for l in text_letters if l.isupper()]
         getter_dict['price'] = getter_dict['price'].replace('$', '')
-        print("{}: ${}".format(getter_dict['title'],
-                               getter_dict['price']))
         try:
             features_dict['price'] = float(getter_dict['price'])
         except ValueError:
@@ -54,10 +59,18 @@ class Feature_Extractor():
         features_dict['title'] = getter_dict['title']
         features_dict['num_keywords_in_title'] = 0
         features_dict['num_keywords_in_text'] = 0
+        features_dict['num_badwords_in_text'] = 0
+        features_dict['num_badwords_in_title'] = 0
+        features_dict['text_fraction_caps'] = (len(text_uppers)
+                                              /float(len(text_letters)))
+        features_dict['title_fraction_caps'] = (len(title_uppers)
+                                              /float(len(title_letters)))
 
         for word in features_dict['title'].split(' '):
             if word.lower() in KEYWORDS:
                 features_dict['num_keywords_in_title'] += 1
+            if word.lower() in BADWORDS:
+                features_dict['num_badwords_in_title'] += 1
 
         for keyword in KEYWORDS:
             if keyword in user_text.lower().split(' '):
@@ -65,6 +78,10 @@ class Feature_Extractor():
                 features_dict[keyword] = 1
             else:
                 features_dict[keyword] = 0
+
+        for keyword in BADWORDS:
+            if keyword in user_text.lower().split(' '):
+                features_dict['num_badwords_in_text'] += 1
 
         features_dict['num_images'] = len(html_data.find_all('img'))
         return features_dict

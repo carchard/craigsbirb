@@ -1,3 +1,4 @@
+import os
 import time
 import json
 import requests
@@ -11,7 +12,8 @@ from constants import CL_DATE_FORMAT
 class Post_Getter:
     def __init__(self, city='boston',
                  start_time=None,
-                 save_fname=GETTER_OUTPUT_FILE):
+                 save_fname=GETTER_OUTPUT_FILE,
+                 save_type='w'):
         if start_time is None:
             self.last_update_time = datetime.datetime.now()
         else:
@@ -20,6 +22,7 @@ class Post_Getter:
         self.base_url = "https://{}".format(city)
         self.base_url += ".craigslist.org/d/photo-video/search/pha"
         self.latest_content = ""
+        self.save_type = save_type
         print("You made a post getter")
 
     def get_urls(self):
@@ -46,7 +49,7 @@ class Post_Getter:
             except IndexError:
                 price = "None Provided"
             dt = block.p.time.attrs['datetime']
-            if DEBUG_LEVEL >= 2:
+            if DEBUG_LEVEL <= 2:
                 print('\n\n' + "".join(['=']*40))
                 print("Title: {}".format(title))
                 print("Link: {}".format(link))
@@ -66,6 +69,10 @@ class Post_Getter:
         self.write_output_file()
 
     def write_output_file(self):
+        if 'a' in self.save_type and os.path.isfile(self.save_fname):
+            with open(self.save_fname, 'r') as f:
+                self.new_links.extend(json.load(f))
+
         with open(self.save_fname, 'w') as f:
             json.dump(self.new_links, f, indent=4, sort_keys=True,
                       separators=(',', ':'))

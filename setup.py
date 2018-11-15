@@ -11,6 +11,7 @@ setup(name='craigsbirb',
       packages=['craigsbirb'],
       install_requires=[
           'bs4',
-          'pandas'
+          'pandas',
+          'selenium'
       ],
       zip_safe=False)

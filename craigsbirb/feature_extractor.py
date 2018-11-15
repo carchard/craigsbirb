@@ -15,9 +15,9 @@ class Feature_Extractor():
         self.getter_dict = {}
         print("You made a feature extractor!")
 
-    def process_new_posts(self):
-        if os.path.isfile(GETTER_OUTPUT_FILE):
-            with open(GETTER_OUTPUT_FILE, 'r') as f:
+    def process_posts(self, json_fname=GETTER_OUTPUT_FILE):
+        if os.path.isfile(json_fname):
+            with open(json_fname, 'r') as f:
                 getter_list = json.load(f)
 
         self.frame_proto = []
@@ -54,7 +54,10 @@ class Feature_Extractor():
         try:
             features_dict['price'] = float(getter_dict['price'])
         except ValueError:
-            features_dict['price'] = np.NaN
+            features_dict['price'] = 9999
+
+        if 'score' in getter_dict:
+            features_dict['score'] = getter_dict['score']
 
         features_dict['title'] = getter_dict['title']
         features_dict['num_keywords_in_title'] = 0
@@ -75,9 +78,9 @@ class Feature_Extractor():
         for keyword in KEYWORDS:
             if keyword in user_text.lower().split(' '):
                 features_dict['num_keywords_in_text'] += 1
-                features_dict[keyword] = 1
-            else:
-                features_dict[keyword] = 0
+                #features_dict[keyword] = 1
+            #else:
+                #features_dict[keyword] = 0
 
         for keyword in BADWORDS:
             if keyword in user_text.lower().split(' '):
@@ -99,4 +102,4 @@ if __name__ == "__main__":
         html_str = ''
 
     fe = Feature_Extractor()
-    fe.process_new_posts()
+    df = fe.process_posts()

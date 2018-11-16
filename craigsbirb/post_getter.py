@@ -72,7 +72,8 @@ class Post_Getter:
         if 'a' in self.save_type and os.path.isfile(self.save_fname):
             with open(self.save_fname, 'r') as f:
                 self.new_links.extend(json.load(f))
-
+        print("we have now collected {} links...".format(len(
+            self.new_links)))
         with open(self.save_fname, 'w') as f:
             json.dump(self.new_links, f, indent=4, sort_keys=True,
                       separators=(',', ':'))

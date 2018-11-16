@@ -25,7 +25,8 @@ if __name__ == "__main__":
     dt_object = datetime.datetime.strptime(date_str, CL_DATE_FORMAT)
 
     cities = ['boston', 'philadelphia', 'longisland', 'newyork',
-              'newhaven', 'hartford']
+              'newhaven', 'hartford', 'cnj', 'albany', 'delaware',
+              'scranton']
     for city in cities:
         pg = Post_Getter(start_time=dt_object, save_fname=new_post_set,
                          city=city, save_type='a')
